@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>早六回忆</title>
+  <style>
+/* 弹窗 (background) */
+.modal {
+    display: none; /* 默认隐藏 */
+    position: fixed; 
+    z-index: 1; 
+    padding-top: 100px; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgb(0,0,0); 
+    background-color: rgba(0,0,0,0.4);
+}
+
+/* 弹窗内容 */
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 80%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* 添加动画 */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0} 
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* 关闭按钮 */
+.close {
+    color: white;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+
+.modal-body {padding: 2px 16px;}
+
+.modal-footer {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+}
+      html,
+      body {
+      width: 100%;
+    }
+      body {
+      font-size: 40px;
+      font-family: 'Bungee Shade', cursive;
+      color: #222;
+      background: #222;
+      background-repeat: no-repeat;
+    }
+
+      .box {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      float: left;
+    }
+      .box:hover .border {
+      -webkit-transform: scale(0.94);
+      transform: scale(0.94);
+      -webkit-transition-duration: 140ms;
+      transition-duration: 140ms;
+    }
+      .box:hover .text {
+      opacity: 1;
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+      -webkit-transition-duration: 140ms;
+      transition-duration: 140ms;
+    }
+      .box:hover .image-wrap {
+      -webkit-transform: scale(1);
+      transform: scale(1);
+      opacity: 1;
+      -webkit-transition-duration: 140ms;
+      transition-duration: 140ms;
+    }
+
+      .border,
+      .text,
+      .image {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      pointer-events: none;
+    }
+
+      .image-wrap {
+      position: absolute;
+      width: 130%;
+      height: 130%;
+      left: -15%;
+      top: -15%;
+      -webkit-transform: scale(0.8);
+      transform: scale(0.8);
+      -webkit-transition: 280ms ease-out;
+      transition: 280ms ease-out;
+      pointer-events: none;
+      opacity: 0.74;
+    }
+      .border {
+      left: -30px;
+      top: -30px;
+      border: 30px solid #222;
+      box-sizing: content-box;
+      -webkit-transition: 360ms ease-in-out;
+      transition: 360ms ease-in-out;
+    }
+      
+      .text {
+      display: -webkit-box;
+      display: flex;
+      -webkit-box-align: center;
+      align-items: center;
+      -webkit-box-pack: center;
+      justify-content: center;
+      opacity: 0;
+      -webkit-transform: translate3d(0, -4%, 0);
+      transform: translate3d(0, -4%, 0);
+      -webkit-transition: 280ms ease-out;
+      transition: 280ms ease-out;
+      text-align: center;
+    }
+      .image {
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+      span {
+          font-size: 40px;
+          font-family: 'Bungee Shade', cursive;
+          color: #222;
+          justify-content: center;
+          align-items: center;
+          backdrop-filter: blur(60px);
+          -webkit-backdrop-filter: blur(5px);
+          border-radius: 60px
+      }
+
+    .box {
+      width: 100%;
+      height: 100vw;
+      float: left;
+    }
+    @media (min-width: 1200px) {
+      .box {
+        width: 50%;
+        height: 50vw;
+      }
+    }
+    @media (min-width: 1400px) {
+      .box {
+        width: 33.333333%;
+        height: 33.33333vw;
+      }
+    }
+    @media (min-width: 2000px) {
+      .box {
+        width: 25%;
+        height: 25vw;
+      }
+    }
+
+    /* image background */
+    .image-0 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/e599a6824b7e2d4802ccef806ee13871.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-1 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/116e3d267690e2232d833f36929143b1.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-2 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/898a74fe92b16e62ebecf01eb591984c.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-3 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/affe0fab2e0a76b16ae274d12ac6b365.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-4 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/6491fe63d3429a70b2b82f6d3c3ad3c8.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-5 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0716/09/042445246a36320cb9a7fc90f0e7102c.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-6 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/a5366638fb1b2848dbe84c31a41d55b8.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-7 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/fa03645e6551368ec48e8b4480a2c6ed.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-8 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/c84d1c0430440b41ad3f2d8d3de022cf.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-9 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/6de050a67810cfcef951be6eea1f1e05.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-10 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/add6ce26a3ef5e75741889ae39e77bb6.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-11 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/fcc10f19f4dd61ac66f8d1227cfd72a8.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-12 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/b1066156910674343d91faf5b52ffbc7.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-13 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0715/13/de3719ad7ccbd4ffd70b053d0b3fac27.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+    .image-14 {
+        background: url(https://ncstatic.clewm.net/rsrc/2022/0716/09/8c75ecfdc46fa7740394d952ca95d6f4.png?x-oss-process=image/resize,w_750/format,gif/sharpen,100/quality,Q_80/interlace,1/auto-orient,1);
+        background-repeat: no-repeat
+      }
+  </style>
+</head>
+
+<body>
+
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-0"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("2222","22222","22222")'>Elsewhere Biking</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-1"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Flying snowflakes</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-2"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Gymnastics perfect</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-3"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Infinity windows</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-4"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Leaves autumn</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-5"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Narrate ambition</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-6"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Photograph inequity</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-7"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Physical undergo</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-8"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Pleasurable friends</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-9"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Rejoicing newyear</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-10"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Satisfied graduation</span>
+    </div>
+  </div>
+    <div class="box">
+        <div class="image-wrap">
+            <div class="image image-11"></div>
+        </div>
+        <div class="border"></div>
+        <div class="text">
+          <span onclick='clicker("","","")'>Soaring aspirations</span>
+        </div>
+    </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-12"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Spiritual respect</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-13"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Spraying enjoyment</span>
+    </div>
+  </div>
+    <div class="box">
+    <div class="image-wrap">
+      <div class="image image-14"></div>
+    </div>
+    <div class="border"></div>
+    <div class="text">
+      <span onclick='clicker("","","")'>Summer coolness</span>
+    </div>
+  </div>
+    <!-- 弹窗 -->
+<div id="myModal" class="modal">
+
+  <!-- 弹窗内容 -->
+	<div class="modal-content">
+	  <div class="modal-header">
+	    <span class="close">&times;</span>
+	    <h2 id="heading">弹窗头部</h2>
+	  </div>
+	  <div class="modal-body">
+	    <p id="bodying">弹窗文本...</p>
+	  </div>
+	  <div class="modal-footer">
+	    <h3 id="footing">弹窗底部</h3>
+	  </div>
+	</div>
+
+</div>
+    <script>
+      var mousePos = {x: -10, y: -10};
+      var boxElements = document.getElementsByClassName('box');
+      var boxes = [];
+      for (var i = 0; i < boxElements.length; i++) {
+          boxes.push({
+            el: boxElements[i],
+            targetX: 0,
+            targetY: 0,
+            prevX: 0,
+            prevY: 0,
+            x: 0,
+            y: 0,
+            left: boxElements[i].offsetLeft,
+            top: boxElements[i].offsetTop,
+            size: boxElements[i].offsetWidth
+        })
+      }
+      function mousemove(e) {
+        mousePos.x = e.pageX;
+        mousePos.y = e.pageY;
+      }
+      function updateBox(box) {
+        if (mousePos.x > box.left && mousePos.x < (box.left + box.size) && mousePos.y > box.top && mousePos.y < (box.top + box.size)) {
+          box.targetX = (box.size / 2 - (mousePos.x - box.left)) * 0.1;
+          box.targetY = (box.size / 2 - (mousePos.y - box.top)) * 0.1;
+        } else {
+          box.targetX = 0;
+          box.targetY = 0;
+        }
+        box.x += (box.targetX - box.x) * 0.2;
+        box.y += (box.targetY - box.y) * 0.2;
+        if (Math.abs(box.x) < .001) box.x = 0;
+        if (Math.abs(box.y) < .001) box.y = 0;
+        if (box.prevX !== box.x && box.prevY !== box.y) {
+          box.el.children[0].children[0].style.transform = 'translate3d(' + box.x + 'px, ' + box.y + 'px, 0)';
+        }
+        box.prevX = box.x;
+        box.prevY = box.y;
+      }
+      function loop() {
+        for (var i = 0, l = boxes.length; i < l; i++) {
+          updateBox(boxes[i]);
+        }
+        requestAnimationFrame(loop);
+      }
+      function resize() {
+        for (var i = 0; i < boxes.length; i++) {
+          boxes[i].left = boxes[i].el.offsetLeft;
+          boxes[i].top = boxes[i].el.offsetTop;
+          boxes[i].size = boxes[i].el.offsetWidth;
+        }
+      }
+      document.addEventListener('mousemove', mousemove);
+      window.addEventListener('resize', resize);
+      loop();
+    // 获取弹窗
+var modal = document.getElementById('myModal');
+var span = document.getElementsByClassName("close")[0];
+var heading = document.getElementById("heading");
+var bodying = document.getElementById("bodying");
+var footing = document.getElementById("footing");
+// 点击按钮打开弹窗
+function clicker(str1,str2,str3) {
+    heading.innerHTML=str1;
+    bodying.innerHTML=str2;
+    footing.innerHTML=str3;
+    modal.style.display = "block";
+}
+// 点击 <span> (x), 关闭弹窗
+span.onclick = function() {
+    modal.style.display = "none";
+}
+// 在用户点击其他地方时，关闭弹窗
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+  </script>
+</html>
