@@ -8,16 +8,16 @@
 function changeImage(num) {
 	element=document.getElementById('myimage'+num)
 	if (element.src.match("lightoff.png")) {
-		element.src="/image/lighton.gif";
+		element.src="./lighton.gif";
 	}
 	else {
-        element.src="/image/lightoff.gif";
+        element.src="./lightoff.gif";
 	}
 }
 </script>
-<img id="myimage1" onclick="changeImage(1)" border="0" src="/image/lightoff.png">
-<img id="myimage2" onclick="changeImage(2)" border="0" src="/image/lightoff.png">
-<img id="myimage3" onclick="changeImage(3)" border="0" src="/image/lightoff.png">
-<img id="myimage4" onclick="changeImage(4)" border="0" src="/image/lightoff.png">
+<img id="myimage1" onclick="changeImage(1)" border="0" src="./lightoff.png">
+<img id="myimage2" onclick="changeImage(2)" border="0" src="./lightoff.png">
+<img id="myimage3" onclick="changeImage(3)" border="0" src="./lightoff.png">
+<img id="myimage4" onclick="changeImage(4)" border="0" src="./lightoff.png">
 </body>
 </html>
