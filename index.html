@@ -1,11 +1,119 @@
-<!doctype html>
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8">
-<link rel="shortcut icon" type="image/ico" href="./favicon.ico"/>
-  <title>Crocodile</title>
+    <meta charset="utf-8">
+    <title>Crocodile</title>
+    <style>
+        .c {display:inline;}
+    </style>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
 <body>
-  <h1>鳄鱼小A的网站</h1>
-  <p>欢迎访问哦</p>
+    <!--
+    <canvas id="c"></canvas> 
+    <script>    
+            var b = document.body;
+         var c = document.getElementsByTagName('canvas')[0];
+         var a = c.getContext('2d');
+     </script>
+     <script>
+     eval('var M=Math,n=M.pow,i,E=2,F="rgba(233,61,109,",d=M.cos,z=M.sin,L=1,u=30,W=window,w=c.width=W.innerWidth,h=c.height=W.innerHeight,r=_1){return M.random()*2-1},y="px Arial",v="213",q="♥",X=w/2,Y=h/2,T=4,p=_1){var e=this;e.g=_1){e.x=X;e.y=Y;e.k=0;e.l=0;e.t=M.random()*19000;e.c=e.t};e.d=_1){a.fillStyle=F+(e.c/e.t)+")";a.fillText(q,e.x,e.y);e.c-=50;e.x+=e.k;e.y+=e.l;e.k=e.k+r();e.l=e.l+r();if(e.c<0||e.x>w||e.x<0||e.y>h||e.y<0){e.g()}};e.g()},A,B;a.textAlign="center";a.strokeStyle="#000";a.lineWidth=2;for(i=0;i<350;i++){M[i]=new p()}setInterval(_1){a.clearRect(0,0,w,h);a.font=u+y;X=(w/6*n(z(T),3)+w/2);Y=0.8*(-h/40*(13*d(T)-5*d(2*T)-2*d(3*T)-d(4*T))+h/2.3);T+=(z(T)+3)/99;for(i=0;i<350;i++){with(M[i]){A=(x/w-0.5)*2,B=-(y/h-0.5);if(L&&(A*A+2*n((B-0.5*n(M.abs(A),0.5)),2))>0.11){k=l=0}d()}}a.font=120+y;if(E>0.1){if(E<1){a.fillStyle=F+E+")";a.fillText("Click",w/2,h/2)}E-=0.02}a.fillStyle="#E93D6D";a.fillText(v,X,Y+u);a.strokeText(v,X,Y+u)},50);b.bgColor="#FFEFF2";c.onmouseup=_1){L=(L)?0:1}'.replace(/(_1)/g,'function('))
+     </script>
+    <div class="container">
+-->
+
+    <span class="c" id="contain-first" style="font-size: 50px;font-family: cursive">
+        This Is<p class="c" id="first-words"></p>
+    </span>
+    <img class="c" id="cursor" src="cursor.gif" width="3" height="45" />
+    <br>
+    <p id="welcome"></p>
+    </div>
+    
+    
+   <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+    <script type="text/javascript" src="js/blog.js"></script>
+    
+    <script type="text/javascript" src="https://cdn.bootcss.com/typed.js/2.0.5/typed.js"></script>
+    <div class="c" id="code">
+        <h1>我有很多比较“得意”的作品,欢迎大家观赏！</h1>
+        <ul style="list-style-type:circle">
+            <li><a href="./tool/randomrollcaller/ver010101">随机点名</a></li>
+            <li><a href="./EDP/memory/6">早六回忆</a></li>
+            <li><a href="./fun/lightbulb">趣味灯泡</a></li>
+        </ul>
+    </div>
+    <script>
+        Element.prototype.typewriter = function (a) {
+            var d = this,
+                c = d.innerHTML,
+                b = 0;
+            d.innerHTML = "";
+            var e = setInterval(function () {
+                b++
+                d.innerHTML = c.substring(0, b) + (b & 1 ? "|" : ""); //&1 这个表达式 可以用来 判断 a的奇偶性
+                if (b >= c.length) {
+                    clearInterval(e)
+                }
+            }, 20)
+            return this
+    
+        }
+        document.getElementById("code").typewriter();
+    </script>
+    
+    
+    <script>
+    $(document).ready(function(){
+    initAutoType(["a Github Site.","Not Just a Website.","Crocodile A's Website."],3,"#first-words",300);
+        initAutoType(["这是鳄鱼小 A 的网站，欢迎大家来访问哦。","這是鱷魚小A的網站，歡迎大家來訪問哦","This is Crocodile A's website, welcome to visit.","C'est le site de crocodile Little a, bienvenue à visiter Oh.","ワニのAちゃんのサイトです。皆さん、訪問してくださいね。"],5,"#welcome",50);
+});
+
+var initAutoType = function(types,typeslenth,filepath,speed){
+  //var types = ["a Blog.","Not Just a Blog.","YinyouPoet's Blog."];
+  var words = $(filepath);
+
+  var stopType = false;     //用于停止自动打字的
+
+  var index = 0;
+  var tempWords = "";
+  var isNext = false;
+  var time = speed;
+
+  var startType = setInterval(function(){
+    if(stopType){
+      //如果需要停止打字
+      clearInterval(startType);
+    }
+    if(tempWords.length === 0){
+      //如果删完了，就开始
+      if(isNext){
+        index++;
+        index = index%typeslenth;
+        isNext = false;
+      }
+      tempWords = types[index].substring(0,tempWords.length+1);
+    }else if(tempWords.length === types[index].length && isNext === false){
+      //如果已经到头了，就要删去
+     // tempWords = tempWords.substring(0,tempWords.length-1);
+      isNext = true;
+      time = 5000;
+    }else{
+      //如果既没删完也没显示完
+      if(isNext){
+        //如果是在减少
+        tempWords = tempWords.substring(0,tempWords.length-1);
+        time = 150;
+      }
+      else{
+        //如果在增多
+        time = 200;
+        tempWords = types[index].substring(0,tempWords.length+1);
+      }
+    }
+    words.html("&nbsp;"+tempWords);
+  },time);
+};
+    </script>
 </body>
 </html>
