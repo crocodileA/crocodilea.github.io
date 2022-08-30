@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+	@keyframes ani{
+		from{
+			transform:rotateY(0deg) rotateX(0deg);
+		}
+		to{
+			transform:rotateY(360deg) rotateX(360deg);
+		}
+	}
+	body{
+		perspective:1000px;
+	}
+	#heart{
+		position:relative;
+		height:200px;
+		width:150px;
+		margin:200px auto;
+		animation:ani 5s linear infinite; 
+		transform-style:preserve-3d;
+	}
+	.line{
+		position:absolute;
+		height:200px;
+		width:150px;
+		border:2px solid red;
+		border-left:0;
+		border-bottom:0;
+		border-radius:50% 50% 0/50% 40% 0;
+	}
+	</style>
+</head>
+<body>
+	<div id="heart" onclick="jump();">
+        <pre id="code" style="font-family: cursive;font-size: 20px;height: 110px;">
+骊歌初动，离情辘辘。
+一载师恩，披拨云雾。
+从今学业，慎思英语。
+未忘教诲，知行弥笃。
+点击爱心查看“秘密相册”！
+        </pre>
+    </div>
+ 
+	<script>
+        function jump() {
+            window.location.href="view.html"
+        }
+		var heart=document.getElementById("heart");
+		var html="";
+		for(var i=0;i<36;i++){
+			html+="<div class='line' style='transform:rotateY("+i*10+"deg) rotateZ(45deg) translateX(25px)'></div>";
+		}
+		heart.innerHTML += html;
+	</script>
+    <script>
+        Element.prototype.typewriter = function (a) {
+            var d = this,
+            c = d.innerHTML,
+            b = 0;
+            d.innerHTML = "";
+            var e = setInterval(function () {
+                b++;
+                d.innerHTML = c.substring(0, b) + (b & 1 ? "|" : ""); //&1 这个表达式 可以用来 判断 a的奇偶性
+                    if (b >= c.length) {
+                        clearInterval(e)
+                    }
+                }, 200)
+                return this
+            }
+            var t = setInterval(function () {
+                document.getElementById("code").typewriter();
+                document.getElementById("code").value="";
+            },15000)
+            document.getElementById("code").typewriter();
+        </script>
+</body>
+</html>
