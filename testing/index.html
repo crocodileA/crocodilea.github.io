@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>markdown</title>
+  </head>
+  <body>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <div id="content"></div>
+    
+    <script>
+      $.get('./yaaaaaa.md', function(response, status, xhr){
+        $("#content").html(marked(response));
+      });
+    </script>
+  </body>
+</html>
