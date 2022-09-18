@@ -1,0 +1,87 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>一天中的体温</title>
+<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+</head>
+<body>
+<div id="container" style="width: 100%; height: 600px; margin: 0 auto"></div>
+<script language="JavaScript">
+$(document).ready(function() {  
+   var chart = {
+      type: 'spline'      
+   }; 
+   var title = {
+      text: '一天内的体温'   
+   };
+   var subtitle = {
+      text: '早七三 李阡陌 20'
+   };
+   var xAxis = {
+      type: 'datetime',
+      dateTimeLabelFormats: { // don't display the dummy year
+         month: '%p %l:%m',
+         year: '%l'
+      },
+      title: {
+         text: 'Time'
+      }
+   };
+   var yAxis = {
+      title: {
+         text: 'temperature (°C)'
+      },
+      min: 35
+   };
+   var tooltip = {
+      headerFormat: '<b>{series.name}</b><br>',
+      pointFormat: '{point.x:%p %l:%m}: {point.y:.1f} °C'
+   };
+   var plotOptions = {
+      spline: {
+         marker: {
+            enabled: true
+         }
+      }
+   };
+   var series= [{
+         name: '9月18日',
+            // Define the data points. All series have a dummy year
+            // of 1970/71 in order to be compared on the same x axis. Note
+            // that in JavaScript, months start at 0 for January, 1 for February etc.
+         data: [
+             [Date.UTC(2020,9,18, 7, 0), 35.3],
+             [Date.UTC(2020,9,18, 8,30), 35.4],
+             [Date.UTC(2020,9,18, 9,30), 35.6],
+             [Date.UTC(2020,9,18,10,15), 35.6],
+             [Date.UTC(2020,9,18,11, 5), 35.4],
+             [Date.UTC(2020,9,18,12,25), 35.3],
+             [Date.UTC(2020,9,18,14,30), 36.6],
+             [Date.UTC(2020,9,18,15,45), 36.2],
+             [Date.UTC(2020,9,18,16,15), 36.2],
+             [Date.UTC(2020,9,18,17, 0), 35.7],
+			 [Date.UTC(2020,9,18,18, 5), 36.0],
+			 [Date.UTC(2020,9,18,19,15), 36.3],
+			 [Date.UTC(2020,9,18,20, 0), 35.6]
+			 [Date.UTC(2020,9,18,22, 5), 35.9]
+			 
+         ]
+      }
+   ];     
+      
+   var json = {};
+   json.chart = chart;
+   json.title = title;
+   json.subtitle = subtitle;
+   json.tooltip = tooltip;
+   json.xAxis = xAxis;
+   json.yAxis = yAxis;  
+   json.series = series;
+   json.plotOptions = plotOptions;
+   $('#container').highcharts(json);
+  
+});
+</script>
+</body>
+</html>
