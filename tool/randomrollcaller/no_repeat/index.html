@@ -1,0 +1,136 @@
+<!--
+  --更新日志：
+  --1.0.1 添加了说明的灯廊效果
+  --1.0.2 添加了插画
+  --1.0.3 将学号改成了姓名
+  --1.1.0 修复了伪随机问题
+  --1.1.1 添加了点名记录表格
+  --1.1.1 将一个人被连续多次点名的可能性降为0
+  --1.1.2 添加了font awesome图标
+---->
+<!DOCtype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>随机点名无重复版</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+	<link rel="stylesheet" href="setting.min.css">
+    <script src="https://cdn.staticfile.org/react/16.4.0/umd/react.development.js"></script>
+    <script src="https://cdn.staticfile.org/react-dom/16.4.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.staticfile.org/babel-standalone/6.26.0/babel.min.js"></script>
+	<script type="text/javascript" src="toname.min.js"></script>
+	<script src="cookie.js"></script>
+</head>
+
+<body>
+    <h1>
+        <font color="blue">
+            随机点名系统 08:1.1.2
+        </font>                                       <!--name-->
+        <br />
+        <font color="red">
+            <marquee align="left" behavior=scroll bgcolor="000000" direction="left" height="100" width="300" hspace="50" vspace="20" loop="-1" scrollamount="10" scrolldelay="100">
+                <big title="一轮内所有人都会且仅会被叫一次">
+                        注意：
+                </big>
+                是无重复版本！
+            </marquee>
+        </font>                                        <!--introduction-->
+    </h1>                                                                     <!--information-->
+	<button onclick="clean();">清空记录</button>
+    <div style="font-size: 20px;color: forestgreen"><div id="rt3"></div></div>
+    <button class="button buttonw" onclick="callagain()">
+        <i class="fa fa-500px"></i>
+        Continue Roll Call
+        <i class="fa fa-500px"></i>
+    </button> 
+    <h1 style="display: inline;">
+        <font color="Peru">
+            <div id="nameshow"></div>
+        </font>
+    </h1>                                                                     <!--rollcall show-->
+    <h2 id="message" style="display: inline;">（点击上面那个按钮开始点名）</h2>                                      <!--message before calling-->
+    <table border="1" class="alt" id="call_record"></table>
+    <script>
+        function uuidv4() { return ([1e2]+-1e5+-1e1).replace(/[018]/g, c =>(c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)); }
+        function ft(num) {
+            return (num - Math.floor( num ));
+        }
+		var num2=[];
+        var x=document.getElementById("message");
+        var y=document.getElementById("nameshow");
+        var z=document.getElementById("call_record");
+        var w=document.getElementById("rt3");
+        var f="";
+        var times=0;
+        var last;
+        var times2=0;
+        window.onload=function() {
+            var temping = num2.filter(function(x, index) {
+                num2[index]=false;
+            }); 
+			var called=cookie.get("called");
+			if(called!="") {
+				x.innerHTML="已继续上次点名";
+				console.log(called);
+				var rec=called.split("-");
+				num2=rec;
+				console.log(num2);
+				times2=num2.length;
+				times=times2;
+				var sam=1;
+				rec.forEach(function(element) {
+					var t=parseInt(element,0);
+					put(sam,t,getname(t));
+					num2[sam-1]=parseInt(num2[sam-1],0);
+					sam++;
+				});
+			} else {
+				x.innerHTML="点击上面那个按钮开始点名";
+			}
+            w.innerHTML="已使用随机种子："+uuidv4();
+        }
+        function callagain() {
+            x.innerHTML="";
+            var term = Math.floor(ft(Math.random()*Math.random()*200)*43)+1;
+            /*if(last == term) {
+                callagain();
+                return ;
+            }*/
+            if(times2==43) {
+                alert("已经点名 43 次了（全都点了一遍了）\n点击确定重新开始！");
+				cookie.del("called");
+                window.location.href=window.location.href;
+                return ;
+                
+            }
+            if(num2.indexOf(term)!=-1) {
+                callagain();
+                return ;
+            }
+			num2[times2]=term;
+            times2++;
+			var jjj=num2.join("-");
+			cookie.set("called",jjj,365);
+            last = term;
+            var name;
+			name=getname(term);
+            y.innerHTML='请<i id="fangsheng">' + name + '</i>回答';
+            times = times + 1;
+			put(times,term,name);
+        }
+		function put(times,term,name) {
+			f="<tr><th><b>" + times + "</b></th><th><b>" + term + "</b></th><th><b>" + name + "</b></th></tr>" +f;
+			z.innerHTML='<caption><b><i class="fa fa-line-chart"></i>点名记录</b></caption><tr><th><b>编号</b></th><th><b>学号</b></th><th><b>名字</b></th></tr>' + f;
+			w.innerHTML="已使用随机种子："+uuidv4();
+		}
+		function clean() {
+			cookie.del('called');
+			window.location.href=window.location.href;
+		}
+    </script>
+
+
+</body>
+
+</html>
