@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>表达式筛选工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // 配置Tailwind自定义颜色
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#6B7280',
+                        light: '#F3F4F6',
+                        border: '#E5E7EB'
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen p-4 md:p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-6">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">表达式数值筛选</h1>
+        
+        <!-- 文件上传区域 -->
+        <div class="mb-6 p-4 border-2 border-dashed border-gray-300 rounded-md">
+            <p class="text-gray-600 mb-3">请选择包含表达式数据的JSON文件：</p>
+            <label class="inline-block bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-700 cursor-pointer transition duration-150">
+                选择JSON文件
+                <input type="file" id="fileInput" accept=".json" class="hidden">
+            </label>
+            <p id="fileName" class="mt-2 text-sm text-gray-500">未选择文件</p>
+            <p id="fileStatus" class="mt-1 text-sm text-gray-500"></p>
+        </div>
+        
+        <!-- 筛选条件输入区域 -->
+        <div class="mb-6" id="filterSection" style="display: none;">
+            <p class="text-gray-600 mb-4">请输入数值范围，筛选符合条件的表达式：</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="lowerBound" class="block text-sm font-medium text-gray-700 mb-1">下限</label>
+                    <input type="number" step="any" id="lowerBound" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                </div>
+                <div>
+                    <label for="upperBound" class="block text-sm font-medium text-gray-700 mb-1">上限</label>
+                    <input type="number" step="any" id="upperBound" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary">
+                </div>
+            </div>
+            <button id="filterBtn" class="mt-4 bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition duration-150">
+                筛选
+            </button>
+        </div>
+        
+        <!-- 结果展示区域 -->
+        <div class="border-t border-gray-200 pt-4" id="resultSection" style="display: none;">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3">筛选结果</h2>
+            <div id="resultContainer" class="space-y-3 text-gray-700">
+                <p class="text-gray-500 italic">请输入范围并点击筛选按钮</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量存储数据库数据
+        let database = null;
+        
+        // 获取DOM元素
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const fileStatus = document.getElementById('fileStatus');
+        const filterSection = document.getElementById('filterSection');
+        const resultSection = document.getElementById('resultSection');
+        const lowerBoundInput = document.getElementById('lowerBound');
+        const upperBoundInput = document.getElementById('upperBound');
+        const filterBtn = document.getElementById('filterBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        
+        // 处理文件选择
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // 处理文件上传
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            // 显示文件名
+            fileName.textContent = `已选择: ${file.name}`;
+            
+            // 验证文件类型
+            if (!file.name.endsWith('.json')) {
+                fileStatus.textContent = '请选择JSON格式的文件';
+                fileStatus.className = 'mt-1 text-sm text-red-500';
+                database = null;
+                filterSection.style.display = 'none';
+                resultSection.style.display = 'none';
+                return;
+            }
+            
+            // 读取文件内容
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    // 解析JSON数据
+                    const data = JSON.parse(e.target.result);
+                    
+                    // 验证数据格式
+                    if (!Array.isArray(data) || data.some(item => !Array.isArray(item) || item.length !== 2)) {
+                        throw new Error('JSON格式不正确，应包含形如[[表达式, 数值], ...]的数组');
+                    }
+                    
+                    // 存储数据
+                    database = data;
+                    
+                    // 显示成功信息和筛选区域
+                    fileStatus.textContent = `成功加载 ${data.length} 条表达式数据`;
+                    fileStatus.className = 'mt-1 text-sm text-green-500';
+                    filterSection.style.display = 'block';
+                    resultSection.style.display = 'block';
+                    resultContainer.innerHTML = '<p class="text-gray-500 italic">请输入范围并点击筛选按钮</p>';
+                } catch (error) {
+                    fileStatus.textContent = `解析错误: ${error.message}`;
+                    fileStatus.className = 'mt-1 text-sm text-red-500';
+                    database = null;
+                    filterSection.style.display = 'none';
+                    resultSection.style.display = 'none';
+                }
+            };
+            
+            reader.onerror = function() {
+                fileStatus.textContent = '文件读取失败';
+                fileStatus.className = 'mt-1 text-sm text-red-500';
+                database = null;
+                filterSection.style.display = 'none';
+                resultSection.style.display = 'none';
+            };
+            
+            // 读取文件
+            reader.readAsText(file);
+        }
+        
+        // 筛选函数
+        function filterExpressions() {
+            // 检查数据是否已加载
+            if (!database) {
+                resultContainer.innerHTML = '<p class="text-red-500">请先加载有效的JSON数据文件</p>';
+                return;
+            }
+            
+            // 获取输入值
+            const lower = parseFloat(lowerBoundInput.value);
+            const upper = parseFloat(upperBoundInput.value);
+            
+            // 验证输入
+            if (isNaN(lower) || isNaN(upper)) {
+                resultContainer.innerHTML = '<p class="text-red-500">请输入有效的数值范围</p>';
+                return;
+            }
+            
+            if (lower > upper) {
+                resultContainer.innerHTML = '<p class="text-red-500">下限不能大于上限</p>';
+                return;
+            }
+            
+            // 筛选数据
+            const filtered = database.filter(item => {
+                const value = parseFloat(item[1]);
+                return !isNaN(value) && value >= lower && value <= upper;
+            });
+            
+            // 显示结果
+            if (filtered.length === 0) {
+                resultContainer.innerHTML = '<p class="text-gray-500 italic">没有找到符合条件的表达式</p>';
+            } else {
+                let html = '';
+                filtered.forEach(item => {
+                    html += `
+                        <div class="p-3 bg-gray-50 rounded-md border border-gray-200">
+                            <div class="font-medium">${item[0]}</div>
+                            <div class="text-gray-600 text-sm mt-1">数值: ${item[1]}</div>
+                        </div>
+                    `;
+                });
+                resultContainer.innerHTML = html;
+            }
+        }
+        
+        // 绑定事件
+        filterBtn.addEventListener('click', filterExpressions);
+        
+        // 支持回车键触发筛选
+        [lowerBoundInput, upperBoundInput].forEach(input => {
+            input.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    filterExpressions();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+    
