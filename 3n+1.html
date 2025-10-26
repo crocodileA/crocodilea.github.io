@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3n+1 Conjecture</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+    }
+    .output-container {
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+
+<h2>3n+1 Conjecture</h2>
+
+<p>Enter a number (n) to see the steps and process to reach 1:</p>
+<input type="number" id="inputNumber" placeholder="Enter a number">
+<button onclick="calculateSteps()">Calculate Steps</button>
+<div id="stepsOutput" class="output-container"></div>
+
+<p>Enter two numbers (m, n) to find the maximum and minimum sr(k) and tn(k) within the range:</p>
+<input type="number" id="inputStart" placeholder="Enter start number">
+<input type="number" id="inputEnd" placeholder="Enter end number">
+<button onclick="calculateMinMaxSr()">Calculate Min/Max sr(k), tn(k)</button>
+<div id="minMaxSrOutput" class="output-container"></div>
+<div id="minMaxTnOutput" class="output-container"></div>
+
+<script>
+function calculateSteps() {
+    var inputNumber = document.getElementById("inputNumber").value;
+    var outputDiv = document.getElementById("stepsOutput");
+
+    // Clear previous output
+    outputDiv.innerHTML = "";
+
+    if (inputNumber.trim() === "") {
+        outputDiv.innerHTML = "Please enter a valid number.";
+        return;
+    }
+
+    var n = parseInt(inputNumber);
+    var steps = calculate3nPlus1Steps(n);
+
+    // Display steps
+    outputDiv.innerHTML = "Steps to reach 1 from " + n + ":<br>";
+    for (var i = 0; i < steps.length; i++) {
+        outputDiv.innerHTML += steps[i] + " ";
+        if (i < steps.length - 1) {
+            outputDiv.innerHTML += "→ ";
+        }
+    }
+}
+
+function calculate3nPlus1Steps(n) {
+    var steps = [n];
+    while (n > 1) {
+        if (n % 2 === 0) {
+            n /= 2;
+        } else {
+            n = 3 * n + 1;
+        }
+        steps.push(n);
+    }
+    return steps;
+}
+
+function calculateMinMaxSr() {
+    var inputStart = document.getElementById("inputStart").value;
+    var inputEnd = document.getElementById("inputEnd").value;
+    var outputDiv = document.getElementById("minMaxSrOutput");
+
+    // Clear previous output
+    outputDiv.innerHTML = "";
+
+    if (inputStart.trim() === "" || inputEnd.trim() === "") {
+        outputDiv.innerHTML = "Please enter valid start and end numbers.";
+        return;
+    }
+
+    var m = parseInt(inputStart);
+    var n = parseInt(inputEnd);
+
+    var minSr = Number.MAX_SAFE_INTEGER;
+    var maxSr = Number.MIN_SAFE_INTEGER;
+    var maxSrNumber = m;
+
+    for (var k = m; k <= n; k++) {
+        var sr = calculateMaxSr(k);
+        if (sr < minSr) {
+            minSr = sr;
+        }
+        if (sr > maxSr) {
+            maxSr = sr;
+            maxSrNumber = k;
+        }
+    }
+
+    // Display result
+    outputDiv.innerHTML = "Minimum sr(k) within the range: " + minSr + "<br>";
+    outputDiv.innerHTML += "Maximum sr(k) within the range: " + maxSr + " (for k = " + maxSrNumber + ")";
+	
+	calculateMinMaxTn();
+}
+
+function calculateMaxSr(k) {
+    var num = k;
+	var maxNumber = k;
+    while (k > 1) {
+        if (k % 2 === 0) {
+            k /= 2;
+        } else {
+            k = 3 * k + 1;
+        }
+        if (k > maxNumber) {
+            maxNumber = k;
+        }
+    }
+    return maxNumber / num;
+}
+
+
+function calculateMinMaxTn() {
+    var inputStart = document.getElementById("inputStart").value;
+    var inputEnd = document.getElementById("inputEnd").value;
+    var outputDiv = document.getElementById("minMaxTnOutput");
+
+    // Clear previous output
+    outputDiv.innerHTML = "";
+
+    if (inputStart.trim() === "" || inputEnd.trim() === "") {
+        outputDiv.innerHTML = "Please enter valid start and end numbers.";
+        return;
+    }
+
+    var m = parseInt(inputStart);
+    var n = parseInt(inputEnd);
+
+    var minTn = Number.MAX_SAFE_INTEGER;
+    var maxTn = Number.MIN_SAFE_INTEGER;
+    var maxTnNumber = m;
+
+    for (var k = m; k <= n; k++) {
+        var tn = calculateMaxTn(k);
+        if (tn < minTn) {
+            minTn = tn;
+        }
+        if (tn > maxTn) {
+            maxTn = tn;
+            maxTnNumber = k;
+        }
+    }
+
+    // Display result
+    outputDiv.innerHTML = "Minimum Tn(k) within the range: " + minTn + "<br>";
+    outputDiv.innerHTML += "Maximum Tn(k) within the range: " + maxTn + " (for k = " + maxTnNumber + ")";
+}
+
+function calculateMaxTn(k) {
+	var maxNumber = k;
+    while (k > 1) {
+        if (k % 2 === 0) {
+            k /= 2;
+        } else {
+            k = 3 * k + 1;
+        }
+        if (k > maxNumber) {
+            maxNumber = k;
+        }
+    }
+    return maxNumber;
+}
+</script>
+
+</body>
+</html>
