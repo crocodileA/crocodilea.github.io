@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicode字符加密/解密工具</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#6366f1',
+                        accent: '#8b5cf6',
+                        dark: '#1e293b',
+                        light: '#f8fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-in': 'slideIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass {
+                background: rgba(255, 255, 255, 0.25);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+            .glass-dark {
+                background: rgba(30, 41, 59, 0.75);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.08);
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.8);
+        }
+        
+        /* 暗色模式滚动条 */
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.3);
+        }
+        
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(99, 102, 241, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800 min-h-screen transition-all-300">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- 标题区域 -->
+        <header class="text-center mb-10 animate-fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent text-shadow mb-2">
+                文本加密/解密工具
+            </h1>
+            <p class="text-slate-600 dark:text-slate-300 text-lg">
+                使用特殊字符进行文本加密与解密
+            </p>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="glass dark:glass-dark rounded-2xl p-6 md:p-8 shadow-lg animate-slide-in">
+            <!-- 模式切换 -->
+            <div class="flex justify-center mb-8">
+                <div class="inline-flex rounded-full bg-slate-100 dark:bg-slate-700 p-1 shadow-sm">
+                    <button id="encryptBtn" class="mode-btn active px-6 py-2 rounded-full text-sm font-medium transition-all-300 bg-white dark:bg-slate-600 shadow-sm">
+                        <i class="fa fa-lock mr-2"></i>加密
+                    </button>
+                    <button id="decryptBtn" class="mode-btn px-6 py-2 rounded-full text-sm font-medium transition-all-300 text-slate-600 dark:text-slate-300">
+                        <i class="fa fa-unlock mr-2"></i>解密
+                    </button>
+                </div>
+            </div>
+
+            <!-- 加密模式内容 -->
+            <div id="encryptMode" class="mode-content">
+                <!-- 输入区域 -->
+                <div class="mb-6">
+                    <label for="plaintext" class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
+                        输入明文
+                    </label>
+                    <textarea id="plaintext" rows="5" placeholder="请输入要加密的文本..." 
+                        class="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary transition-all-300 resize-none"></textarea>
+                </div>
+
+                <!-- 编码选择 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
+                        选择编码方式
+                    </label>
+                    <div class="flex flex-wrap gap-3">
+                        <label class="encoding-option flex items-center p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 cursor-pointer hover:border-primary transition-all-300">
+                            <input type="radio" name="encoding" value="base4" class="mr-2" checked>
+                            <span class="text-slate-800 dark:text-slate-100">
+                                Base4 <span class="text-xs text-slate-500 dark:text-slate-400">(4os)</span>
+                            </span>
+                        </label>
+                        <label class="encoding-option flex items-center p-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 cursor-pointer hover:border-primary transition-all-300">
+                            <input type="radio" name="encoding" value="base8" class="mr-2">
+                            <span class="text-slate-800 dark:text-slate-100">
+                                Base8 <span class="text-xs text-slate-500 dark:text-slate-400">(8os)</span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="flex justify-center mb-6">
+                    <button id="doEncryptBtn" class="px-8 py-3 bg-gradient-to-r from-primary to-accent text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:opacity-95 transition-all-300 flex items-center">
+                        <i class="fa fa-magic mr-2"></i>执行加密
+                    </button>
+                </div>
+            </div>
+
+            <!-- 解密模式内容 -->
+            <div id="decryptMode" class="mode-content hidden">
+                <!-- 输入区域 -->
+                <div class="mb-6">
+                    <label for="ciphertext" class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
+                        输入密文
+                    </label>
+                    <textarea id="ciphertext" rows="5" placeholder="请输入要解密的文本..." 
+                        class="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-primary focus:border-primary transition-all-300 resize-none"></textarea>
+                </div>
+
+                <!-- 操作按钮 -->
+                <div class="flex justify-center mb-6">
+                    <button id="doDecryptBtn" class="px-8 py-3 bg-gradient-to-r from-secondary to-accent text-white font-medium rounded-lg shadow-md hover:shadow-lg hover:opacity-95 transition-all-300 flex items-center">
+                        <i class="fa fa-magic mr-2"></i>执行解密
+                    </button>
+                </div>
+            </div>
+
+            <!-- 结果区域 -->
+            <div id="resultArea" class="hidden">
+                <div class="border-t border-slate-200 dark:border-slate-600 pt-6">
+                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">
+                        <span id="resultTitle">加密结果</span>
+                    </label>
+                    <div class="relative">
+                        <textarea id="resultText" rows="5" readonly 
+                            class="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 transition-all-300 resize-none"></textarea>
+                        <button id="copyResultBtn" class="absolute top-3 right-3 p-2 bg-white dark:bg-slate-700 rounded-lg shadow hover:bg-slate-100 dark:hover:bg-slate-600 transition-all-300">
+                            <i class="fa fa-copy text-slate-600 dark:text-slate-300"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 使用说明卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <!-- 加密说明 -->
+            <div class="glass dark:glass-dark rounded-xl p-6 shadow-lg animate-fade-in" style="animation-delay: 0.2s;">
+                <h3 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-3 flex items-center">
+                    <i class="fa fa-lock text-primary mr-2"></i>加密说明
+                </h3>
+                <div class="space-y-3 text-slate-600 dark:text-slate-300">
+                    <ol class="list-decimal list-inside pl-2 space-y-2">
+                        <li>选择"加密"模式</li>
+                        <li>在输入框中输入要加密的文本</li>
+                        <li>选择Base4或Base8编码方式</li>
+                        <li>点击"执行加密"按钮</li>
+                        <li>加密结果将显示在下方，可点击复制按钮复制</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- 解密说明 -->
+            <div class="glass dark:glass-dark rounded-xl p-6 shadow-lg animate-fade-in" style="animation-delay: 0.3s;">
+                <h3 class="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-3 flex items-center">
+                    <i class="fa fa-unlock text-secondary mr-2"></i>解密说明
+                </h3>
+                <div class="space-y-3 text-slate-600 dark:text-slate-300">
+                    <ol class="list-decimal list-inside pl-2 space-y-2">
+                        <li>选择"解密"模式</li>
+                        <li>在输入框中粘贴已加密的文本</li>
+                        <li>点击"执行解密"按钮</li>
+                        <li>解密结果将显示在下方，可点击复制按钮复制</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="mt-10 text-center text-slate-500 dark:text-slate-400 text-sm">
+            <p>Unicode字符加密/解密工具 &copy; 2025</p>
+        </footer>
+    </div>
+
+    <!-- 通知提示 -->
+    <div id="notification" class="fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all-300 flex items-center z-50">
+        <i id="notificationIcon" class="mr-2"></i>
+        <span id="notificationText"></span>
+    </div>
+
+    <script>
+        // 编码字符集
+        const BASE4_CHARS = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'I'];
+        const BASE8_CHARS = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'l', 'I', '│', '∣', '❘'];
+        
+        // 编码标识符
+        const BASE4_IDENTIFIER = 'Ⅰ';
+        const BASE8_IDENTIFIER = 'Ⅱ';
+        
+        // DOM元素
+        const encryptBtn = document.getElementById('encryptBtn');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const encryptMode = document.getElementById('encryptMode');
+        const decryptMode = document.getElementById('decryptMode');
+        const doEncryptBtn = document.getElementById('doEncryptBtn');
+        const doDecryptBtn = document.getElementById('doDecryptBtn');
+        const plaintext = document.getElementById('plaintext');
+        const ciphertext = document.getElementById('ciphertext');
+        const resultArea = document.getElementById('resultArea');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultText = document.getElementById('resultText');
+        const copyResultBtn = document.getElementById('copyResultBtn');
+        const notification = document.getElementById('notification');
+        const notificationIcon = document.getElementById('notificationIcon');
+        const notificationText = document.getElementById('notificationText');
+        
+        // 模式切换
+        encryptBtn.addEventListener('click', () => {
+            setActiveMode('encrypt');
+        });
+        
+        decryptBtn.addEventListener('click', () => {
+            setActiveMode('decrypt');
+        });
+        
+        function setActiveMode(mode) {
+            if (mode === 'encrypt') {
+                encryptBtn.classList.add('active', 'bg-white', 'dark:bg-slate-600', 'shadow-sm');
+                encryptBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
+                decryptBtn.classList.remove('active', 'bg-white', 'dark:bg-slate-600', 'shadow-sm');
+                decryptBtn.classList.add('text-slate-600', 'dark:text-slate-300');
+                
+                encryptMode.classList.remove('hidden');
+                decryptMode.classList.add('hidden');
+                resultTitle.textContent = '加密结果';
+            } else {
+                decryptBtn.classList.add('active', 'bg-white', 'dark:bg-slate-600', 'shadow-sm');
+                decryptBtn.classList.remove('text-slate-600', 'dark:text-slate-300');
+                encryptBtn.classList.remove('active', 'bg-white', 'dark:bg-slate-600', 'shadow-sm');
+                encryptBtn.classList.add('text-slate-600', 'dark:text-slate-300');
+                
+                decryptMode.classList.remove('hidden');
+                encryptMode.classList.add('hidden');
+                resultTitle.textContent = '解密结果';
+            }
+            
+            // 隐藏结果区域
+            resultArea.classList.add('hidden');
+        }
+        
+        // 编码选项样式
+        const encodingOptions = document.querySelectorAll('.encoding-option');
+        encodingOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                // 移除所有选项的选中样式
+                encodingOptions.forEach(opt => {
+                    opt.classList.remove('border-primary', 'bg-blue-50', 'dark:bg-slate-600/50');
+                });
+                
+                // 添加当前选项的选中样式
+                option.classList.add('border-primary', 'bg-blue-50', 'dark:bg-slate-600/50');
+            });
+        });
+        
+        // 初始化第一个编码选项为选中状态
+        if (encodingOptions.length > 0) {
+            encodingOptions[0].classList.add('border-primary', 'bg-blue-50', 'dark:bg-slate-600/50');
+        }
+        
+        // 加密功能
+        doEncryptBtn.addEventListener('click', () => {
+            const text = plaintext.value.trim();
+            if (!text) {
+                showNotification('请输入要加密的文本', 'warning');
+                return;
+            }
+            
+            const encoding = document.querySelector('input[name="encoding"]:checked').value;
+            let result;
+            
+            try {
+                if (encoding === 'base4') {
+                    result = encryptBase4(text);
+                } else {
+                    result = encryptBase8(text);
+                }
+                
+                displayResult(result);
+                showNotification('加密成功', 'success');
+            } catch (error) {
+                showNotification('加密失败: ' + error.message, 'error');
+            }
+        });
+        
+        // 解密功能
+        doDecryptBtn.addEventListener('click', () => {
+            const text = ciphertext.value.trim();
+            if (!text) {
+                showNotification('请输入要解密的文本', 'warning');
+                return;
+            }
+            
+            try {
+                let result;
+                
+                // 检查标识符
+                if (text.startsWith(BASE4_IDENTIFIER)) {
+                    result = decryptBase4(text.substring(BASE4_IDENTIFIER.length));
+                } else if (text.startsWith(BASE8_IDENTIFIER)) {
+                    result = decryptBase8(text.substring(BASE8_IDENTIFIER.length));
+                } else {
+                    throw new Error('无法识别的编码格式，请检查输入是否正确');
+                }
+                
+                displayResult(result);
+                showNotification('解密成功', 'success');
+            } catch (error) {
+                showNotification('解密失败: ' + error.message, 'error');
+            }
+        });
+        
+        // Base4加密
+        function encryptBase4(text) {
+            let result = '';
+            
+            // 遍历每个字符
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const code = char.charCodeAt(0);
+                
+                // 将Unicode编码转换为Base4
+                let base4 = '';
+                let temp = code;
+                
+                if (temp === 0) {
+                    base4 = BASE4_CHARS[0];
+                } else {
+                    while (temp > 0) {
+                        base4 = BASE4_CHARS[temp % 4] + base4;
+                        temp = Math.floor(temp / 4);
+                    }
+                }
+                
+                // 确保每个字符的编码长度为8，不足前面补0
+                while (base4.length < 8) {
+                    base4 = BASE4_CHARS[0] + base4;
+                }
+                
+                // 直接拼接，不使用空格分隔
+                result += base4;
+            }
+            
+            // 添加标识符
+            return BASE4_IDENTIFIER + result;
+        }
+        
+        // Base4解密
+        function decryptBase4(text) {
+            let result = '';
+            
+            // 每8个字符一截断
+            for (let i = 0; i < text.length; i += 8) {
+                const code = text.substr(i, 8);
+                
+                // 将Base4转换为Unicode编码
+                let unicode = 0;
+                for (let j = 0; j < code.length; j++) {
+                    const char = code[j];
+                    const index = BASE4_CHARS.indexOf(char);
+                    
+                    if (index === -1) {
+                        throw new Error('发现无效的Base4字符: ' + char);
+                    }
+                    
+                    unicode = unicode * 4 + index;
+                }
+                
+                // 将Unicode编码转换为字符
+                result += String.fromCharCode(unicode);
+            }
+            
+            return result;
+        }
+        
+        // Base8加密
+        function encryptBase8(text) {
+            let result = '';
+            
+            // 遍历每个字符
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const code = char.charCodeAt(0);
+                
+                // 将Unicode编码转换为Base8
+                let base8 = '';
+                let temp = code;
+                
+                if (temp === 0) {
+                    base8 = BASE8_CHARS[0];
+                } else {
+                    while (temp > 0) {
+                        base8 = BASE8_CHARS[temp % 8] + base8;
+                        temp = Math.floor(temp / 8);
+                    }
+                }
+                
+                // 确保每个字符的编码长度为6，不足前面补0
+                while (base8.length < 6) {
+                    base8 = BASE8_CHARS[0] + base8;
+                }
+                
+                // 直接拼接，不使用空格分隔
+                result += base8;
+            }
+            
+            // 添加标识符
+            return BASE8_IDENTIFIER + result;
+        }
+        
+        // Base8解密
+        function decryptBase8(text) {
+            let result = '';
+            
+            // 每6个字符一截断
+            for (let i = 0; i < text.length; i += 6) {
+                const code = text.substr(i, 6);
+                
+                // 将Base8转换为Unicode编码
+                let unicode = 0;
+                for (let j = 0; j < code.length; j++) {
+                    const char = code[j];
+                    const index = BASE8_CHARS.indexOf(char);
+                    
+                    if (index === -1) {
+                        throw new Error('发现无效的Base8字符: ' + char);
+                    }
+                    
+                    unicode = unicode * 8 + index;
+                }
+                
+                // 将Unicode编码转换为字符
+                result += String.fromCharCode(unicode);
+            }
+            
+            return result;
+        }
+        
+        // 显示结果
+        function displayResult(text) {
+            resultText.value = text;
+            resultArea.classList.remove('hidden');
+            
+            // 平滑滚动到结果区域
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // 复制结果
+        copyResultBtn.addEventListener('click', () => {
+            resultText.select();
+            document.execCommand('copy');
+            
+            showNotification('已复制到剪贴板', 'success');
+        });
+        
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            // 设置通知类型
+            switch (type) {
+                case 'success':
+                    notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg bg-green-50 text-green-700 border border-green-200 transform transition-all-300 flex items-center z-50';
+                    notificationIcon.className = 'fa fa-check-circle mr-2';
+                    break;
+                case 'error':
+                    notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg bg-red-50 text-red-700 border border-red-200 transform transition-all-300 flex items-center z-50';
+                    notificationIcon.className = 'fa fa-exclamation-circle mr-2';
+                    break;
+                case 'warning':
+                    notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg bg-yellow-50 text-yellow-700 border border-yellow-200 transform transition-all-300 flex items-center z-50';
+                    notificationIcon.className = 'fa fa-exclamation-triangle mr-2';
+                    break;
+                default:
+                    notification.className = 'fixed bottom-6 right-6 px-6 py-3 rounded-lg shadow-lg bg-blue-50 text-blue-700 border border-blue-200 transform transition-all-300 flex items-center z-50';
+                    notificationIcon.className = 'fa fa-info-circle mr-2';
+            }
+            
+            // 设置通知内容
+            notificationText.textContent = message;
+            
+            // 显示通知
+            notification.classList.remove('translate-y-20', 'opacity-0');
+            
+            // 3秒后隐藏通知
+            setTimeout(() => {
+                notification.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+        
+        // 自动检测系统主题并设置初始主题
+        function setInitialTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+            }
+        }
+        
+        // 初始化
+        setInitialTheme();
+    </script>
+</body>
+</html>
