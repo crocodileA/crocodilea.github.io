@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>对称陀螺定点转动可视化</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1D1F27;
+  color: #E0E2EF;
+  font-family: 'Segoe UI','PingFang SC',sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+#left-panel {
+  width: 262px;
+  min-width: 262px;
+  background: #20223A;
+  border-right: 1px solid #2E3052;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 10px 10px;
+  gap: 4px;
+}
+.panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #FF6B6B;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 0 4px 2px;
+  border-bottom: 1px solid #2E3052;
+  margin-bottom: 2px;
+}
+.sec-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: #7A7EC8;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 6px;
+  margin-bottom: 1px;
+  padding-left: 2px;
+}
+.prow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 2px 0;
+}
+.prow label {
+  font-size: 11px;
+  color: #9AA0C8;
+  min-width: 118px;
+  flex-shrink: 0;
+}
+.prow input[type="number"] {
+  width: 82px;
+  background: #181A2A;
+  border: 1px solid #383B62;
+  color: #E0E2EF;
+  font-size: 11px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  outline: none;
+}
+.prow input[type="number"]:focus { border-color: #4ECDC4; }
+.prow input[type="range"] {
+  flex: 1;
+  accent-color: #4ECDC4;
+  cursor: pointer;
+}
+.prow .vd {
+  font-size: 10px;
+  color: #4ECDC4;
+  min-width: 44px;
+  text-align: right;
+  font-family: monospace;
+}
+.btn-row {
+  display: flex;
+  gap: 7px;
+  margin-top: 8px;
+}
+button {
+  flex: 1;
+  padding: 6px 0;
+  border-radius: 5px;
+  border: none;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: opacity .15s;
+}
+button:hover { opacity: .85; }
+#btn-reset { background: linear-gradient(135deg,#4ECDC4,#45B7D1); color: #fff; }
+#btn-pause { background: #2A2D4A; color: #B0B4D8; border: 1px solid #383B62; }
+#center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #1D1F27;
+  min-width: 0;
+}
+#three-canvas { width: 100%; height: 100%; display: block; }
+#center-title {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-weight: 700;
+  color: #FF6B6B;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+  white-space: nowrap;
+  text-shadow: 0 0 12px #FF6B6B44;
+}
+#hint-text {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: #5A5E88;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#sim-time {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #4ECDC4;
+  font-family: monospace;
+  pointer-events: none;
+}
+#right-panel {
+  width: 258px;
+  min-width: 258px;
+  background: #20223A;
+  border-left: 1px solid #2E3052;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 10px 10px;
+  gap: 5px;
+}
+.r-title { font-size: 12px; font-weight: 700; color: #4ECDC4; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 0 4px 2px; border-bottom: 1px solid #2E3052; margin-bottom: 2px; }
+.dc {
+  background: #181A2A;
+  border: 1px solid #2E3052;
+  border-radius: 7px;
+  padding: 8px 10px;
+  margin: 2px 0;
+}
+.dc-t { font-size: 10px; color: #7A7EC8; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 5px; }
+.dr { display: flex; justify-content: space-between; align-items: center; padding: 2px 0; border-bottom: 1px solid #1a1c2a; }
+.dr:last-child { border-bottom: none; }
+.dl { font-size: 11px; color: #7A7EC8; }
+.dv { font-size: 11px; font-family: monospace; color: #FF6B6B; min-width: 108px; text-align: right; }
+.dc.green { background: #101e10; border-color: #1a4a2a; }
+.dc.green .dc-t { color: #4ECDC4; }
+.dc.green .dv { color: #4ECDC4; }
+.dc.amber { background: #1a1a10; border-color: #4a4a1a; }
+.dc.amber .dc-t { color: #FFD93D; }
+.dc.amber .dv { color: #FFD93D; }
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div id="left-panel">
+  <div class="panel-title">参数设置</div>
+
+  <div class="sec-title">转动惯量 (kg·m²)</div>
+  <div class="prow"><label>I₁ = I₂</label><input type="number" id="p_I1" value="0.04" min="0.0001" max="10" step="0.001"></div>
+  <div class="prow"><label>I₃ (对称轴)</label><input type="number" id="p_I3" value="0.02" min="0.0001" max="10" step="0.001"></div>
+
+  <div class="sec-title">物理参数</div>
+  <div class="prow"><label>质量 m (kg)</label><input type="number" id="p_m" value="0.5" min="0.001" max="100" step="0.01"></div>
+  <div class="prow"><label>质心距固定点 l (m)</label><input type="number" id="p_l" value="0.15" min="0.001" max="2" step="0.005"></div>
+  <div class="prow"><label>重力加速度 g (m/s²)</label><input type="number" id="p_g" value="9.8" min="0.01" max="100" step="0.1"></div>
+
+  <div class="sec-title">初始角速度 (rad/s)</div>
+  <div class="prow"><label>φ̇₀ 自转</label><input type="number" id="p_pd0" value="50" min="-500" max="500" step="1"></div>
+  <div class="prow"><label>θ̇₀ 章动</label><input type="number" id="p_td0" value="0.5" min="-50" max="50" step="0.1"></div>
+  <div class="prow"><label>ψ̇₀ 进动</label><input type="number" id="p_sd0" value="5" min="-500" max="500" step="0.5"></div>
+
+  <div class="sec-title">初始章动角</div>
+  <div class="prow"><label>θ₀ (°)</label><input type="number" id="p_t0" value="30" min="1" max="179" step="1"></div>
+
+  <div class="sec-title">仿真控制</div>
+  <div class="prow">
+    <label>速度倍率</label>
+    <input type="range" id="p_speed" min="0.01" max="5" step="0.01" value="1">
+    <span class="vd" id="p_speed_d">1.00×</span>
+  </div>
+  <div class="prow">
+    <label>轨迹长度</label>
+    <input type="range" id="p_trail" min="100" max="3000" step="100" value="800">
+    <span class="vd" id="p_trail_d">800</span>
+  </div>
+
+  <div class="sec-title">显示选项</div>
+  <div class="prow">
+    <label>母线（自转标记）</label>
+    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+      <input type="checkbox" id="chk_genline" checked style="accent-color:#FFD93D;width:14px;height:14px;">
+      <span style="font-size:11px;color:#FFD93D;">显示</span>
+    </label>
+  </div>
+
+  <div class="btn-row">
+    <button id="btn-reset">重置/应用</button>
+    <button id="btn-pause">暂停</button>
+  </div>
+</div>
+
+<!-- CENTER -->
+<div id="center">
+  <div id="center-title">对称陀螺 · 定点转动仿真</div>
+  <canvas id="three-canvas"></canvas>
+  <div id="sim-time">t = 0.000000 s</div>
+  <div id="hint-text">拖拽旋转视角 · 滚轮缩放</div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div id="right-panel">
+  <div class="r-title">实时数据</div>
+
+  <div class="dc">
+    <div class="dc-t">欧拉角 (rad)</div>
+    <div class="dr"><span class="dl">φ 自转角</span><span class="dv" id="d_phi">—</span></div>
+    <div class="dr"><span class="dl">θ 章动角</span><span class="dv" id="d_theta">—</span></div>
+    <div class="dr"><span class="dl">ψ 进动角</span><span class="dv" id="d_psi">—</span></div>
+  </div>
+
+  <div class="dc">
+    <div class="dc-t">欧拉角速度 (rad/s)</div>
+    <div class="dr"><span class="dl">φ̇ 自转速</span><span class="dv" id="d_phid">—</span></div>
+    <div class="dr"><span class="dl">θ̇ 章动速</span><span class="dv" id="d_thetad">—</span></div>
+    <div class="dr"><span class="dl">ψ̇ 进动速</span><span class="dv" id="d_psid">—</span></div>
+  </div>
+
+  <div class="dc amber">
+    <div class="dc-t">固定点约束力</div>
+    <div class="dr"><span class="dl">支持力 N (N)</span><span class="dv" id="d_N">—</span></div>
+    <div class="dr"><span class="dl">摩擦力 f (N)</span><span class="dv" id="d_f">—</span></div>
+  </div>
+
+  <div class="dc green">
+    <div class="dc-t">守恒量</div>
+    <div class="dr"><span class="dl">总能量 E (J)</span><span class="dv" id="d_E">—</span></div>
+    <div class="dr"><span class="dl">角动量 Lz (J·s)</span><span class="dv" id="d_Lz">—</span></div>
+    <div class="dr"><span class="dl">p_φ (J·s)</span><span class="dv" id="d_pphi">—</span></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/*
+ * ====================================================================
+ * 对称陀螺（I1=I2≠I3）定点转动 · Three.js r128 仿真
+ *
+ * 坐标系：Three.js 标准，y 轴竖直向上，固定点在原点。
+ *
+ * 欧拉角约定（ZYZ → 这里用 YXY，因竖直轴为 y）：
+ *   ψ  进动角：绕空间固定 y 轴旋转
+ *   θ  章动角：绕中间节线（Rx）旋转
+ *   φ  自转角：绕体固定对称轴（y'）旋转
+ *
+ * 旋转矩阵：R = Ry(ψ) · Rx(θ) · Ry(φ)
+ *   体坐标 y'' 轴（对称轴）在实验室坐标中的方向 n̂：
+ *     n̂ = R · ŷ = (-sinθ·sinψ, cosθ, sinθ·cosψ)
+ *
+ * 广义坐标：(ψ, θ, φ)，拉格朗日量守恒量：
+ *   p_φ = I3·(φ̇ + ψ̇·cosθ)          ← 沿对称轴角动量（自转守恒）
+ *   L_z = I1·ψ̇·sin²θ + p_φ·cosθ     ← 竖直角动量（进动守恒）
+ *   E   = ½I1·(θ̇² + ψ̇²·sin²θ)
+ *         + ½I3·(φ̇+ψ̇·cosθ)²
+ *         + mgl·cosθ
+ *
+ * 运动方程（只需积分 θ）：
+ *   ψ̇ = (L_z - p_φ·cosθ) / (I1·sin²θ)       ← 由守恒量直接算
+ *   φ̇ = p_φ/I3 - ψ̇·cosθ                      ← 同上
+ *   I1·θ̈ = sinθ·[I1·ψ̇²·cosθ - p_φ·ψ̇ + mgl] ← 有效势运动方程
+ *
+ * 数值方法：4 阶 Runge-Kutta，子步长 0.0002 s
+ * ====================================================================
+ */
+
+const $ = id => document.getElementById(id);
+const gp = id => parseFloat($(id).value) || 0;
+
+// Three.js 初始化
+const canvas = $('three-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setClearColor(0x1D1F27);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 100);
+
+// 灯光
+scene.add(new THREE.AmbientLight(0xffffff, 0.45));
+const dirL = new THREE.DirectionalLight(0xffffff, 0.9);
+dirL.position.set(2, 3, 2);
+scene.add(dirL);
+scene.add(new THREE.DirectionalLight(0x4488cc, 0.25).position.set(-1,-1,2));
+
+// 地面网格
+const grid = new THREE.GridHelper(2, 24, 0x2E3052, 0x23253A);
+scene.add(grid);
+
+// 空间固定坐标轴
+function addAxis(dir, col) {
+  const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), dir.clone().multiplyScalar(0.38)]);
+  scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color: col })));
+}
+addAxis(new THREE.Vector3(1,0,0), 0xFF6B6B);
+addAxis(new THREE.Vector3(0,1,0), 0x4ECDC4);
+addAxis(new THREE.Vector3(0,0,1), 0xFFD93D);
+
+// 固定点标记
+const fpMesh = new THREE.Mesh(
+  new THREE.SphereGeometry(0.014,16,16),
+  new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0x444444 })
+);
+scene.add(fpMesh);
+
+// 陀螺组（绕原点旋转）
+const topGroup = new THREE.Group();
+scene.add(topGroup);
+
+let params_g = {}, consMesh = null;
+let genLine = null; // 黄色母线引用，便于控制可见性
+
+function buildTop(l) {
+  while(topGroup.children.length) topGroup.remove(topGroup.children[0]);
+  genLine = null;
+
+  // 锥体：顶点在原点，底面在 y = l
+  // THREE.ConeGeometry: 高度沿 y 轴，几何中心在 y=0 → 需偏移 l/2
+  const h = l;
+  const r = l * 0.28;
+  const coneG = new THREE.ConeGeometry(r, h, 32);
+  const coneM = new THREE.MeshPhongMaterial({ color: 0xCC4444, emissive: 0x220000, shininess: 80, transparent: true, opacity: 0.90 });
+  const cone = new THREE.Mesh(coneG, coneM);
+  cone.position.y = h / 2;
+  topGroup.add(cone);
+
+  // 顶部飞轮盘
+  const diskG = new THREE.CylinderGeometry(r * 1.7, r * 1.7, l * 0.07, 32);
+  const diskM = new THREE.MeshPhongMaterial({ color: 0x4ECDC4, emissive: 0x003030, shininess: 120 });
+  const disk = new THREE.Mesh(diskG, diskM);
+  disk.position.y = h + l * 0.035;
+  topGroup.add(disk);
+
+  // 轴心杆
+  const rodG = new THREE.CylinderGeometry(r * 0.12, r * 0.12, h * 1.5, 12);
+  const rodM = new THREE.MeshPhongMaterial({ color: 0xDDDDDD, shininess: 60 });
+  const rod = new THREE.Mesh(rodG, rodM);
+  rod.position.y = h * 0.75;
+  topGroup.add(rod);
+
+  // 质心黄球
+  const cmG = new THREE.SphereGeometry(l * 0.045, 16, 16);
+  const cmM = new THREE.MeshPhongMaterial({ color: 0xFFD93D, emissive: 0x331100 });
+  const cm = new THREE.Mesh(cmG, cmM);
+  cm.position.y = l;
+  topGroup.add(cm);
+
+  // 对称轴虚线（体坐标 y 轴方向箭头）
+  const axG = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0,0,0), new THREE.Vector3(0, h * 1.55, 0)
+  ]);
+  const axL = new THREE.Line(axG, new THREE.LineBasicMaterial({ color: 0xFFD93D }));
+  topGroup.add(axL);
+
+  // 黄色母线：从固定点(原点)沿锥面到底面边缘某点，位于 z 轴一侧
+  // 锥底圆心在 y=h，边缘点在 (r, h, 0)（体坐标 x 正方向，便于观察自转）
+  const glG = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(r, h, 0)
+  ]);
+  genLine = new THREE.Line(glG, new THREE.LineBasicMaterial({ color: 0xFFFF00, linewidth: 2 }));
+  genLine.visible = $('chk_genline') ? $('chk_genline').checked : true;
+  topGroup.add(genLine);
+}
+
+// ---- 轨迹 ----
+let trail = [], trailMax = 800;
+let trailGeo, trailLine;
+
+function initTrail(max) {
+  trailMax = max; trail = [];
+  if (trailLine) scene.remove(trailLine);
+  trailGeo = new THREE.BufferGeometry();
+  const buf = new Float32Array(max * 3);
+  trailGeo.setAttribute('position', new THREE.BufferAttribute(buf, 3));
+  trailGeo.setDrawRange(0, 0);
+  trailLine = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color: 0xFF6B6B, transparent:true, opacity:0.55 }));
+  scene.add(trailLine);
+}
+
+function pushTrail(pt) {
+  trail.push(pt.clone());
+  if (trail.length > trailMax) trail.shift();
+  const pos = trailGeo.attributes.position;
+  for (let i = 0; i < trail.length; i++) pos.setXYZ(i, trail[i].x, trail[i].y, trail[i].z);
+  trailGeo.setDrawRange(0, trail.length);
+  pos.needsUpdate = true;
+}
+
+// ---- 仿真状态 ----
+let S = {}; // {psi, theta, phi, psi_dot, theta_dot, phi_dot, t}
+let P = {}; // {I1, I3, m, l, g}
+let Lz0 = 0, pphi0 = 0, E0 = 0;
+let running = false, paused = false;
+
+function getConserved(s, p) {
+  const c = Math.cos(s.theta), si = Math.sin(s.theta);
+  const omega3 = s.phi_dot + s.psi_dot * c;
+  const T = 0.5 * p.I1 * (s.theta_dot*s.theta_dot + s.psi_dot*s.psi_dot*si*si)
+          + 0.5 * p.I3 * omega3 * omega3;
+  const V = p.m * p.g * p.l * c;
+  return {
+    E:    T + V,
+    Lz:   p.I1 * s.psi_dot * si * si + p.I3 * omega3 * c,
+    pphi: p.I3 * omega3
+  };
+}
+
+// 从守恒量+θ → ψ̇ 和 φ̇
+function fromConserved(theta, p) {
+  const c = Math.cos(theta), si = Math.sin(theta);
+  const si2 = si * si;
+  const psi_dot = Math.abs(si) < 1e-9 ? 0 : (Lz0 - pphi0 * c) / (p.I1 * si2);
+  const phi_dot = pphi0 / p.I3 - psi_dot * c;
+  return { psi_dot, phi_dot };
+}
+
+// θ̈ 运动方程
+function thetaDDot(theta, p) {
+  const c = Math.cos(theta), si = Math.sin(theta);
+  const si2 = si * si;
+  const psi_d = Math.abs(si) < 1e-9 ? 0 : (Lz0 - pphi0 * c) / (p.I1 * si2);
+  return si * (p.I1 * psi_d * psi_d * c - pphi0 * psi_d + p.m * p.g * p.l) / p.I1;
+}
+
+// RK4 步进（只积分 theta, theta_dot, psi, phi）
+function rk4Step(s, p, dt) {
+  // 利用守恒量，只需积分 θ（二阶）+ ψ 和 φ（一阶，从守恒量直接得到速度）
+  function deriv(theta, theta_dot, psi, phi) {
+    const { psi_dot, phi_dot } = fromConserved(theta, p);
+    const theta_ddot = thetaDDot(theta, p);
+    return { dtheta: theta_dot, dtheta_dot: theta_ddot, dpsi: psi_dot, dphi: phi_dot };
+  }
+
+  const d1 = deriv(s.theta, s.theta_dot, s.psi, s.phi);
+  const d2 = deriv(s.theta + d1.dtheta*dt/2, s.theta_dot + d1.dtheta_dot*dt/2, s.psi + d1.dpsi*dt/2, s.phi + d1.dphi*dt/2);
+  const d3 = deriv(s.theta + d2.dtheta*dt/2, s.theta_dot + d2.dtheta_dot*dt/2, s.psi + d2.dpsi*dt/2, s.phi + d2.dphi*dt/2);
+  const d4 = deriv(s.theta + d3.dtheta*dt, s.theta_dot + d3.dtheta_dot*dt, s.psi + d3.dpsi*dt, s.phi + d3.dphi*dt);
+
+  const theta_new = s.theta + dt/6*(d1.dtheta + 2*d2.dtheta + 2*d3.dtheta + d4.dtheta);
+  const theta_dot_new = s.theta_dot + dt/6*(d1.dtheta_dot + 2*d2.dtheta_dot + 2*d3.dtheta_dot + d4.dtheta_dot);
+  const psi_new = s.psi + dt/6*(d1.dpsi + 2*d2.dpsi + 2*d3.dpsi + d4.dpsi);
+  const phi_new = s.phi + dt/6*(d1.dphi + 2*d2.dphi + 2*d3.dphi + d4.dphi);
+  const { psi_dot: pd, phi_dot: phid } = fromConserved(theta_new, p);
+
+  return {
+    theta: theta_new, theta_dot: theta_dot_new,
+    psi: psi_new, phi: phi_new,
+    psi_dot: pd, phi_dot: phid,
+    t: s.t + dt
+  };
+}
+
+// ---- 旋转四元数（YXY 欧拉角）----
+// R = Ry(ψ) · Rx(θ) · Ry(φ)
+const _qA = new THREE.Quaternion();
+const _qB = new THREE.Quaternion();
+const _qC = new THREE.Quaternion();
+const _ey = new THREE.Vector3(0,1,0);
+const _ex = new THREE.Vector3(1,0,0);
+
+function eulerYXY(psi, theta, phi) {
+  _qA.setFromAxisAngle(_ey, psi);
+  _qB.setFromAxisAngle(_ex, theta);
+  _qC.setFromAxisAngle(_ey, phi);
+  const q = new THREE.Quaternion();
+  q.multiplyQuaternions(_qA, _qB);
+  q.multiplyQuaternions(q, _qC);
+  return q;
+}
+
+// 对称轴在实验室坐标中的方向
+// 直接用 topGroup 当前四元数旋转体坐标系的 y 轴，与渲染完全同步
+const _axisUp = new THREE.Vector3(0, 1, 0);
+
+function getAxisDir() {
+  const n = _axisUp.clone();
+  n.applyQuaternion(topGroup.quaternion);
+  return n;
+}
+
+// ---- 约束力 ----
+function computeForces(s, p) {
+  const c = Math.cos(s.theta), si = Math.sin(s.theta);
+  const siPsi = Math.sin(s.psi), cPsi = Math.cos(s.psi);
+  const { psi_dot, phi_dot } = fromConserved(s.theta, p);
+  const theta_dot = s.theta_dot;
+  const theta_ddot = thetaDDot(s.theta, p);
+
+  // 实验室系质心位置：直接从四元数旋转得到，与渲染完全一致
+  const nDir = _axisUp.clone().applyQuaternion(topGroup.quaternion);
+  const rx = p.l * nDir.x;
+  const ry = p.l * nDir.y;
+  const rz = p.l * nDir.z;
+
+  // 实验室坐标系中的角速度向量（与 nDir 一致的坐标系）
+  // 节线方向 = Ry(ψ)·x̂，但用四元数更安全，这里近似用解析式
+  // 需和 nDir 的坐标系一致，所以用四元数旋转 x̂ 和对称轴
+  // 节线 = topGroup.quaternion 旋转前 ← 进动分量 ψ̇ 作用的 x 轴（节线=Ry(ψ)·x̂）
+  // 用解析式但匹配 nDir：
+  // nDir = (sinθ·sinψ_eff, cosθ, sinθ·cosψ_eff) [Three.js实际]
+  // 从 nDir 反推 sinψ_eff, cosψ_eff:
+  const sinPsiE = (si > 1e-9) ? nDir.x / si : 0;
+  const cosPsiE = (si > 1e-9) ? nDir.z / si : 1;
+
+  // ω = ψ̇·ŷ + θ̇·节线 + φ̇·n̂
+  // 节线（Ry(ψ)·x̂）= (cosPsiE, 0, -sinPsiE)
+  const omX = theta_dot * cosPsiE + phi_dot * nDir.x;
+  const omY = psi_dot + phi_dot * c;
+  const omZ = -theta_dot * sinPsiE + phi_dot * nDir.z;
+
+  // 角加速度（近似，θ̈ 主导）
+  const alX = theta_ddot * cosPsiE;
+  const alY = 0;
+  const alZ = -theta_ddot * sinPsiE;
+
+  // α × r
+  const acr_x = alY*rz - alZ*ry;
+  const acr_y = alZ*rx - alX*rz;
+  const acr_z = alX*ry - alY*rx;
+
+  // ω × r
+  const wcr_x = omY*rz - omZ*ry;
+  const wcr_y = omZ*rx - omX*rz;
+  const wcr_z = omX*ry - omY*rx;
+
+  // ω × (ω × r)
+  const a_c_x = omY*wcr_z - omZ*wcr_y;
+  const a_c_y = omZ*wcr_x - omX*wcr_z;
+  const a_c_z = omX*wcr_y - omY*wcr_x;
+
+  // a_cm = (α×r) + (ω×(ω×r))
+  const ax = acr_x + a_c_x;
+  const ay = acr_y + a_c_y;
+  const az = acr_z + a_c_z;
+
+  // 支持力（N，竖直分量）: N - mg = m*ay → N = m*(ay+g)
+  const N = p.m * (ay + p.g);
+  // 水平摩擦力
+  const f = p.m * Math.sqrt(ax*ax + az*az);
+  return { N, f };
+}
+
+// ---- 初始化 ----
+function initSim() {
+  P = { I1: gp('p_I1'), I3: gp('p_I3'), m: gp('p_m'), l: gp('p_l'), g: gp('p_g') };
+  const theta0 = gp('p_t0') * Math.PI / 180;
+  const phi_dot0 = gp('p_pd0');
+  const theta_dot0 = gp('p_td0');
+  const psi_dot0 = gp('p_sd0');
+
+  S = { phi: 0, theta: theta0, psi: 0, phi_dot: phi_dot0, theta_dot: theta_dot0, psi_dot: psi_dot0, t: 0 };
+
+  // 计算守恒量（从用户给定初始条件）
+  const cons = getConserved(S, P);
+  E0 = cons.E; Lz0 = cons.Lz; pphi0 = cons.pphi;
+
+  // 用守恒量反算 psi_dot, phi_dot（保证一致）
+  const upd = fromConserved(theta0, P);
+  S.psi_dot = upd.psi_dot;
+  S.phi_dot = upd.phi_dot;
+
+  buildTop(P.l);
+  trailMax = parseInt($('p_trail').value) || 800;
+  initTrail(trailMax);
+
+  running = true; paused = false;
+  $('btn-pause').textContent = '暂停';
+}
+
+// ---- 6位有效数字格式化 ----
+function fmt(x) {
+  if (!isFinite(x)) return 'NaN';
+  if (x === 0) return '0.00000';
+  const abs = Math.abs(x);
+  const mag = Math.floor(Math.log10(abs));
+  const dec = Math.max(0, Math.min(10, 5 - mag));
+  return x.toFixed(dec);
+}
+
+function updateDisplay(s, cons, forces) {
+  $('d_phi').textContent = fmt(s.phi);
+  $('d_theta').textContent = fmt(s.theta);
+  $('d_psi').textContent = fmt(s.psi);
+  $('d_phid').textContent = fmt(s.phi_dot);
+  $('d_thetad').textContent = fmt(s.theta_dot);
+  $('d_psid').textContent = fmt(s.psi_dot);
+  $('d_N').textContent = fmt(forces.N);
+  $('d_f').textContent = fmt(forces.f);
+  $('d_E').textContent = fmt(cons.E);
+  $('d_Lz').textContent = fmt(cons.Lz);
+  $('d_pphi').textContent = fmt(cons.pphi);
+  $('sim-time').textContent = `t = ${s.t.toFixed(6)} s`;
+}
+
+// ---- 相机控制 ----
+let camT = 0.7, camP = 0.4, camR = 1.3;
+let drag = false, mx0 = 0, my0 = 0;
+canvas.addEventListener('mousedown', e => { drag = true; mx0 = e.clientX; my0 = e.clientY; });
+window.addEventListener('mouseup', () => { drag = false; });
+window.addEventListener('mousemove', e => {
+  if (!drag) return;
+  camT += (e.clientX - mx0) * 0.012; mx0 = e.clientX;
+  camP = Math.max(0.05, Math.min(Math.PI/2-0.05, camP - (e.clientY - my0) * 0.012)); my0 = e.clientY;
+  posCamera();
+});
+canvas.addEventListener('wheel', e => { camR = Math.max(0.25, Math.min(5, camR + e.deltaY * 0.0008)); posCamera(); });
+
+function posCamera() {
+  camera.position.set(
+    camR * Math.cos(camP) * Math.sin(camT),
+    camR * Math.sin(camP) + 0.05,
+    camR * Math.cos(camP) * Math.cos(camT)
+  );
+  camera.lookAt(0, 0.05, 0);
+}
+posCamera();
+
+// ---- 按钮 ----
+$('btn-reset').addEventListener('click', initSim);
+$('btn-pause').addEventListener('click', () => {
+  if (!running) { initSim(); return; }
+  paused = !paused;
+  $('btn-pause').textContent = paused ? '继续' : '暂停';
+});
+$('p_speed').addEventListener('input', function() { $('p_speed_d').textContent = (+this.value).toFixed(2)+'×'; });
+$('p_trail').addEventListener('input', function() { $('p_trail_d').textContent = this.value; });
+$('chk_genline').addEventListener('change', function() {
+  if (genLine) genLine.visible = this.checked;
+});
+
+// ---- resize ----
+function onResize() {
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (w > 0 && h > 0) {
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+}
+window.addEventListener('resize', onResize);
+
+// ---- 主循环 ----
+const DT_SUB = 0.0002;
+let lastTs = null;
+
+function loop(now) {
+  requestAnimationFrame(loop);
+  onResize();
+  if (!running || paused) { renderer.render(scene, camera); return; }
+  if (lastTs === null) lastTs = now;
+  const dtReal = Math.min((now - lastTs) * 0.001, 0.05);
+  lastTs = now;
+  const spd = parseFloat($('p_speed').value) || 1;
+  let dtLeft = dtReal * spd;
+  while (dtLeft > 1e-9) {
+    const dt = Math.min(dtLeft, DT_SUB);
+    S = rk4Step(S, P, dt);
+    dtLeft -= dt;
+  }
+  // 更新3D
+  topGroup.quaternion.copy(eulerYXY(S.psi, S.theta, S.phi));
+  // 轨迹：对称轴顶端
+  const n = getAxisDir();
+  pushTrail(n.multiplyScalar(P.l * 1.45));
+  // 数据
+  const cons = getConserved(S, P);
+  const forces = computeForces(S, P);
+  updateDisplay(S, cons, forces);
+  renderer.render(scene, camera);
+}
+
+// ---- 启动 ----
+initSim();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
